@@ -1,0 +1,242 @@
+/*********************************************** VARS AND MIXINS */
+$border: 1px solid rgba(#999, 0.1);
+$hoverBg: rgba(#000, 0.1);
+$hoverFg: #ccc;
+$colorKey: #0099cc;
+$colorKeyFg: #fff;
+$colorKeyHov: #26d8ff;
+$colorInView: #fff;
+$colorInViewSubtle: #ccc;
+$interiorMargin: 5px;
+$colorKey2: $colorKey;
+$navInViewIndicator: $colorKey;
+$navInViewBg: darken($colorKey, 30%);
+
+@mixin ellipsize() {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin placeholderTypeIcon($size: 12px, $offset: 3px) {
+  $b: floor($size/4);
+  content: "";
+  box-sizing: border-box;
+  display: inline-block;
+  height: $size;
+  width: $size;
+  border: $b solid $colorKey;
+  border-radius: $b;
+  margin-right: $interiorMargin;
+  transform: translateY($offset);
+}
+
+@mixin test($c: yellow, $o: 0.2) {
+  background: rgba($c, $o);
+}
+
+/*********************************************** LAYOUT */
+body {
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  background: #333;
+  color: #999;
+}
+
+.l-main {
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+}
+
+.l-wrapper--nav {
+  display: flex;
+  flex: 0 0 auto;
+  width: 200px;
+}
+
+.l-view {
+  flex: 1 1 auto;
+  border-left: $border;
+  margin-left: 10px;
+  padding-left: 10px;
+
+  &__label {
+    color: $colorInView;
+    &:before {
+      @include placeholderTypeIcon(18px, 3px);
+      border-color: $colorInViewSubtle;
+    }
+  }
+}
+
+/*********************************************** NAV */
+.c-nav {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+
+  &--ancestors,
+  &--siblings {
+    flex: 0 0 auto;
+  }
+  
+  &--ancestors {
+    // @include test(red, 0.1);
+  }
+
+  &--siblings {
+    // @include test(green, 0.1);
+  }
+
+  &--children {
+    // @include test(blue, 0.1);
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: all;
+  }
+}
+
+/*********************************************** NAV ITEMS */
+.c-nav__item {
+  $d: 20px;
+  border-bottom: $border;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 1px 0;
+  user-select: none;
+
+  // > * + * {
+  //   // margin-left: $interiorMargin;
+  // }
+
+  &:hover {
+    background: $hoverBg;
+  }
+
+  &__tree-up,
+  &__tree-down,
+  &__label {
+    border-radius: 3px;
+    &:hover {
+      color: darken($colorKeyFg, 10%);
+    }
+  }
+
+  &__tree-up,
+  &__tree-down {
+    color: #fff;
+    flex: 0 0 auto;
+    height: $d;
+    width: $d;
+    opacity: 0;
+    pointer-events: none;
+    position: relative;
+    text-align: center;
+    &:before {
+      // Nav arrow
+      $c: rgba(#999, 0.5);
+      $d: 7px;
+      $w: 3px;
+      border: solid $c;
+      border-width: $w;
+      border-width: 0 $w $w 0;
+      content: '';
+      display: block;
+      position: absolute;
+      left: 50%; top: 50%;
+      height: $d;
+      width: $d;
+    }
+
+    &:hover:before {
+      border-color: $hoverFg;
+    }
+  }
+
+  &__tree-up:before {
+    transform: translate(-30%, -50%) rotate(135deg);
+  }
+
+  &__tree-down:before {
+    transform: translate(-70%, -50%) rotate(-45deg);
+  }
+
+  &__label {
+    // @include test(yellow);
+    @include ellipsize();
+    padding: 4px 5px;
+    flex: 1 1 auto;
+    &:before {
+      @include placeholderTypeIcon(14px, 3px);
+    }
+  }
+
+  &--in-view {
+    $c: $colorInView;
+    color: $c;
+    .c-nav__item__label:before {
+      border-color: $colorInViewSubtle;
+    }
+  }
+
+  &--ancestor {
+    // Always show nav up element
+    .c-nav__item__tree-up {
+      opacity: 1;
+      pointer-events: inherit;
+    }
+  }
+
+  &--sibling,
+  &--child {
+    &.c-nav__item--has-kids {
+      .c-nav__item__tree-down {
+        opacity: 1;
+        pointer-events: inherit;
+      }
+    }
+  }
+}
+
+// TRANSITIONS
+.slide-left,
+.slide-right {
+  animation-duration: 500ms;
+  animation-iteration-count: 1;
+  transition: all;
+  transition-timing-function: ease-in-out;
+}
+
+.slide-left {
+  animation-name: animSlideLeft;
+}
+
+.slide-right {
+  animation-name: animSlideRight;
+}
+
+@keyframes animSlideLeft {
+  0% {opactiy: 0; transform: translateX(100%);}
+  10% {opacity: 1;}
+  100% {transform: translateX(0);}
+}
+
+@keyframes animSlideRight {
+  0% {opactiy: 0; transform: translateX(-100%);}
+  10% {opacity: 1;}
+  100% {transform: translateX(0);}
+}
+
+// MISC
+h2 {
+  margin-top: 0;
+}
